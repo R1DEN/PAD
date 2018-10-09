@@ -5,7 +5,6 @@ public class ChatServerThread extends Thread {
     private Socket socket;
     private ChatServer server;
     private int ID;
-    private int pickedChannel;
     private DataInputStream streamIn = null;
     private DataOutputStream streamOut = null;
     private boolean isPublisher = false;
@@ -26,7 +25,7 @@ public class ChatServerThread extends Thread {
                     case ("get channel"):
                         streamOut.writeUTF("pick channel: 1,2,3");
                         streamOut.flush();
-                        pickedChannel = Integer.parseInt(streamIn.readUTF());
+                        int pickedChannel = Integer.parseInt(streamIn.readUTF());
                         server.setChannel(pickedChannel,this);
                         streamOut.writeUTF("picked channel:" + pickedChannel);
                         streamOut.flush();

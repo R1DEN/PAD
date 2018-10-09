@@ -1,4 +1,3 @@
-import javax.naming.NamingException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -53,17 +52,18 @@ class ChatServer implements Runnable {
         }
     }
 
-    public List<Socket> getConnectedClients() {
-        return new ArrayList<>(connectedClients.keySet());
-    }
-    public Socket getSocket(int port) {
-        List<Socket> socketList = new ArrayList<>(connectedClients.keySet());
-        for (Socket curSocket :
-                socketList) {
-            if (curSocket.getPort()==port) return curSocket;
-        }
-        return null;
-    }
+//    public List<Socket> getConnectedClients() {
+//        return new ArrayList<>(connectedClients.keySet());
+//    }
+
+//    public Socket getSocket(int port) {
+//        List<Socket> socketList = new ArrayList<>(connectedClients.keySet());
+//        for (Socket curSocket :
+//                socketList) {
+//            if (curSocket.getPort()==port) return curSocket;
+//        }
+//        return null;
+//    }
 
     private void start() {
         if (thread == null) {
