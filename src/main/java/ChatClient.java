@@ -39,7 +39,7 @@ class ChatClient implements Runnable {
     }
 
     public void handle(String msg) {
-            System.out.println(msg);
+        System.out.println(msg);
     }
 
     private void start() throws IOException {

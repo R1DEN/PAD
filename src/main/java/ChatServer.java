@@ -9,7 +9,7 @@ import java.util.Map;
 class ChatServer implements Runnable {
     private ServerSocket server = null;
     private Thread thread = null;
-    private final Map<Socket,ChatServerThread> connectedClients = new HashMap<>();
+    private final Map<Socket, ChatServerThread> connectedClients = new HashMap<>();
     private final List<List<ChatServerThread>> channelClients = new ArrayList<>();
     private boolean publisherIsSet;
 
@@ -69,7 +69,7 @@ class ChatServer implements Runnable {
         if (thread == null) {
             thread = new Thread(this);
             thread.start();
-            for (int i=0; i<3;i++){
+            for (int i = 0; i < 3; i++) {
                 channelClients.add(new ArrayList<ChatServerThread>());
             }
         }
@@ -84,24 +84,23 @@ class ChatServer implements Runnable {
 
 
     public String setPublisher(ChatServerThread chatServerThread) {
-        if (!publisherIsSet){
-            publisherIsSet=true;
+        if (!publisherIsSet) {
+            publisherIsSet = true;
             chatServerThread.setAsPublisher();
             return "Publisher set successfully";
-        }  else
-        {
+        } else {
             return "Publisher already set";
         }
     }
 
     public void broadcast(int channel, String input) {
-        for (ChatServerThread chatServerThread : channelClients.get(channel-1)){
+        for (ChatServerThread chatServerThread : channelClients.get(channel - 1)) {
             chatServerThread.broadcastTo(input, channel);
         }
 
     }
 
     public void setChannel(int pickedChannel, ChatServerThread chatServerThread) {
-        channelClients.get(pickedChannel-1).add(chatServerThread);
+        channelClients.get(pickedChannel - 1).add(chatServerThread);
     }
 }

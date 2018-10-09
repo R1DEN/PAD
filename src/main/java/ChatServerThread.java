@@ -26,11 +26,11 @@ public class ChatServerThread extends Thread {
                         streamOut.writeUTF("pick channel: 1,2,3");
                         streamOut.flush();
                         int pickedChannel = Integer.parseInt(streamIn.readUTF());
-                        server.setChannel(pickedChannel,this);
+                        server.setChannel(pickedChannel, this);
                         streamOut.writeUTF("picked channel:" + pickedChannel);
                         streamOut.flush();
                         break;
-                    case("publisher"):
+                    case ("publisher"):
                         streamOut.writeUTF(server.setPublisher(this));
                         streamOut.flush();
                         break;
@@ -45,9 +45,9 @@ public class ChatServerThread extends Thread {
                         }
 
                     default:
-                      //  if (pickedPartner != null) {
-                      //      server.sendTo(pickedPartner, input, socket);
-                      //  }
+                        //  if (pickedPartner != null) {
+                        //      server.sendTo(pickedPartner, input, socket);
+                        //  }
                         break;
                 }
             } catch (IOException ioe) {
@@ -68,7 +68,7 @@ public class ChatServerThread extends Thread {
     }
 
     public void setAsPublisher() {
-        isPublisher=true;
+        isPublisher = true;
     }
 
     public void broadcastTo(String input, int originChannel) {
