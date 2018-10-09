@@ -1,3 +1,4 @@
+import javax.naming.NamingException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,6 +11,8 @@ class ChatServer implements Runnable {
     private ServerSocket server = null;
     private Thread thread = null;
     private final Map<Socket,ChatServerThread> connectedClients = new HashMap<>();
+    private final List<List<ChatServerThread>> channelClients = new ArrayList<>();
+    private boolean publisherIsSet;
 
     private ChatServer(int port) {
         try {
@@ -62,14 +65,13 @@ class ChatServer implements Runnable {
         return null;
     }
 
-    public void sendTo(Socket receiver, String message, Socket sender) {
-        connectedClients.get(receiver).setPickedPartner(sender);
-        connectedClients.get(receiver).sendTo(message, sender);
-    }
     private void start() {
         if (thread == null) {
             thread = new Thread(this);
             thread.start();
+            for (int i=0; i<3;i++){
+                channelClients.add(new ArrayList<ChatServerThread>());
+            }
         }
     }
 
@@ -81,4 +83,25 @@ class ChatServer implements Runnable {
     }
 
 
+    public String setPublisher(ChatServerThread chatServerThread) {
+        if (!publisherIsSet){
+            publisherIsSet=true;
+            chatServerThread.setAsPublisher();
+            return "Publisher set successfully";
+        }  else
+        {
+            return "Publisher already set";
+        }
+    }
+
+    public void broadcast(int channel, String input) {
+        for (ChatServerThread chatServerThread : channelClients.get(channel-1)){
+            chatServerThread.broadcastTo(input, channel);
+        }
+
+    }
+
+    public void setChannel(int pickedChannel, ChatServerThread chatServerThread) {
+        channelClients.get(pickedChannel-1).add(chatServerThread);
+    }
 }
