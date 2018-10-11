@@ -11,7 +11,7 @@ class ChatServer implements Runnable {
     private Thread thread = null;
     private final Map<Socket, ChatServerThread> connectedClients = new HashMap<>();
     private final List<List<ChatServerThread>> channelClients = new ArrayList<>();
-    private boolean publisherIsSet;
+    private boolean publisherIsSet = false;
 
     private ChatServer(int port) {
         try {
