@@ -5,9 +5,10 @@ public class ChatServerThread extends Thread {
     private Socket socket;
     private ChatServer server;
     private int ID;
-    private DataInputStream streamIn = null;
-    private DataOutputStream streamOut = null;
+    private ObjectInputStream streamIn = null;
+    private ObjectOutputStream streamOut = null;
     private boolean isPublisher = false;
+    private Message message;
 
     public ChatServerThread(ChatServer server, Socket socket) {
         this.server = server;
@@ -23,15 +24,19 @@ public class ChatServerThread extends Thread {
                 switch (input.toLowerCase()) {
                     case ("switch channel"):
                     case ("get channel"):
-                        streamOut.writeUTF("pick channel: 1,2,3");
+                        message.setMessage("pick channel: 1,2,3");
+                        streamOut.writeObject(message);
                         streamOut.flush();
-                        int pickedChannel = Integer.parseInt(streamIn.readUTF());
+                        message= (Message) streamIn.readObject();
+                        int pickedChannel = Integer.parseInt(message.getMessage());
                         server.setChannel(pickedChannel, this);
-                        streamOut.writeUTF("picked channel:" + pickedChannel);
+                        message.setMessage("picked channel:" + pickedChannel);
+                        streamOut.writeObject(message);
                         streamOut.flush();
                         break;
                     case ("publisher"):
-                        streamOut.writeUTF(server.setPublisher(this));
+                        message.setMessage(server.setPublisher(this));
+                        streamOut.writeObject(message);
                         streamOut.flush();
                         break;
                     case ("publish"):
@@ -52,14 +57,16 @@ public class ChatServerThread extends Thread {
                 }
             } catch (IOException ioe) {
                 System.out.println("Unexpected exception: " + ioe.getMessage());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
         }
     }
 
 
     public void open() throws IOException {
-        streamIn = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-        streamOut = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        streamIn = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+        streamOut = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
     }
 
     public void close() throws IOException {
