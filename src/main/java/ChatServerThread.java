@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -5,10 +7,11 @@ public class ChatServerThread extends Thread {
     private Socket socket;
     private ChatServer server;
     private int ID;
-    private ObjectInputStream streamIn = null;
-    private ObjectOutputStream streamOut = null;
+    private DataInputStream streamIn = null;
+    private DataOutputStream streamOut = null;
     private boolean isPublisher = false;
-    private Message message;
+    private Message message = new Message();
+    private Gson gson = new Gson();
 
     public ChatServerThread(ChatServer server, Socket socket) {
         this.server = server;
@@ -20,33 +23,34 @@ public class ChatServerThread extends Thread {
         System.out.println("Server Thread " + ID + " running.");
         while (true) {
             try {
-                String input = streamIn.readUTF();
+                String input = gson.fromJson(streamIn.readUTF(),Message.class).getMessage();
                 switch (input.toLowerCase()) {
                     case ("switch channel"):
                     case ("get channel"):
                         message.setMessage("pick channel: 1,2,3");
-                        streamOut.writeObject(message);
+                        streamOut.writeUTF(gson.toJson(message));
                         streamOut.flush();
-                        message= (Message) streamIn.readObject();
-                        int pickedChannel = Integer.parseInt(message.getMessage());
+                        int pickedChannel = Integer.parseInt(gson.fromJson(streamIn.readUTF(),Message.class).getMessage());
                         server.setChannel(pickedChannel, this);
                         message.setMessage("picked channel:" + pickedChannel);
-                        streamOut.writeObject(message);
+                        streamOut.writeUTF(gson.toJson(message));
                         streamOut.flush();
                         break;
                     case ("publisher"):
                         message.setMessage(server.setPublisher(this));
-                        streamOut.writeObject(message);
+                        streamOut.writeUTF(gson.toJson(message));
                         streamOut.flush();
                         break;
                     case ("publish"):
                         if (isPublisher) {
-                            streamOut.writeUTF("pick channel: 1,2,3");
+                            message.setMessage("pick channel: 1,2,3");
+                            streamOut.writeUTF(gson.toJson(message));
                             streamOut.flush();
-                            int channel = Integer.parseInt(streamIn.readUTF());
-                            streamOut.writeUTF("enter message: ");
+                            int channel = Integer.parseInt(gson.fromJson(streamIn.readUTF(),Message.class).getMessage());
+                            message.setMessage("enter message: ");
+                            streamOut.writeUTF(gson.toJson(message));
                             streamOut.flush();
-                            server.broadcast(channel, streamIn.readUTF());
+                            server.broadcast(channel, gson.fromJson(streamIn.readUTF(),Message.class).getMessage());
                         }
 
                     default:
@@ -57,16 +61,14 @@ public class ChatServerThread extends Thread {
                 }
             } catch (IOException ioe) {
                 System.out.println("Unexpected exception: " + ioe.getMessage());
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             }
         }
     }
 
 
     public void open() throws IOException {
-        streamIn = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-        streamOut = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        streamIn = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+        streamOut = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
     }
 
     public void close() throws IOException {
@@ -80,7 +82,8 @@ public class ChatServerThread extends Thread {
 
     public void broadcastTo(String input, int originChannel) {
         try {
-            streamOut.writeUTF("Channel number " + originChannel + " sent:\n" + input);
+            message.setMessage("Channel number " + originChannel + " sent:\n" + input);
+            streamOut.writeUTF(gson.toJson(message));
             streamOut.flush();
         } catch (IOException e) {
             e.printStackTrace();

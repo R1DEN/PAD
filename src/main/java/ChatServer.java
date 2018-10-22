@@ -93,9 +93,9 @@ class ChatServer implements Runnable {
         }
     }
 
-    public void broadcast(int channel, Message input) {
+    public void broadcast(int channel, String input) {
         for (ChatServerThread chatServerThread : channelClients.get(channel - 1)) {
-            chatServerThread.broadcastTo(input.getMessage(), channel);
+            chatServerThread.broadcastTo(input, channel);
         }
 
     }

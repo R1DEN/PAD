@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+
 import java.net.*;
 import java.io.*;
 
@@ -7,6 +9,8 @@ class ChatClient implements Runnable {
     private DataInputStream console = null;
     private DataOutputStream streamOut = null;
     private ChatClientThread client = null;
+    Gson gson = new Gson();
+    Message message = new Message();
 
     private ChatClient(String serverName, int serverPort) {
         System.out.println("Establishing connection. Please wait ...");
@@ -29,8 +33,13 @@ class ChatClient implements Runnable {
     public void run() {
         while (thread != null) {
             try {
-                streamOut.writeUTF(console.readLine());
-                streamOut.flush();
+                String input = console.readLine();
+                if (input != null) {
+                    message.setMessage(input);
+                    streamOut.writeUTF(gson.toJson(message));
+                    streamOut.flush();
+                }
+
             } catch (IOException ioe) {
                 System.out.println("Sending error: " + ioe.getMessage());
                 stop();
@@ -39,7 +48,7 @@ class ChatClient implements Runnable {
     }
 
     public void handle(String msg) {
-        System.out.println(msg);
+        System.out.println(gson.fromJson(msg, Message.class).getMessage());
     }
 
     private void start() throws IOException {
