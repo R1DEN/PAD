@@ -2,7 +2,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class ChatClientThread extends Thread {
+class ChatClientThread extends Thread {
     private Socket socket = null;
     private ChatClient client = null;
     private DataInputStream streamIn = null;

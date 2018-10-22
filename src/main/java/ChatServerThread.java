@@ -3,7 +3,7 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.net.Socket;
 
-public class ChatServerThread extends Thread {
+class ChatServerThread extends Thread {
     private Socket socket;
     private ChatServer server;
     private int ID;

@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Message implements Serializable {
+class Message implements Serializable {
     public Message(String message) {
         this.message = message;
     }

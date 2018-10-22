@@ -9,8 +9,8 @@ class ChatClient implements Runnable {
     private DataInputStream console = null;
     private DataOutputStream streamOut = null;
     private ChatClientThread client = null;
-    Gson gson = new Gson();
-    Message message = new Message();
+    private Gson gson = new Gson();
+    private Message message = new Message();
 
     private ChatClient(String serverName, int serverPort) {
         System.out.println("Establishing connection. Please wait ...");
