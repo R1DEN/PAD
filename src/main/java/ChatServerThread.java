@@ -18,7 +18,7 @@ class ChatServerThread extends Thread {
     private List<Message> deadLetters = new ArrayList<>();
     private boolean isConnected = false;
 
-    public ChatServerThread(ChatServer server, Socket socket) {
+    ChatServerThread(ChatServer server, Socket socket) {
         this.server = server;
         this.socket = socket;
         ID = socket.getPort();
@@ -96,7 +96,7 @@ class ChatServerThread extends Thread {
     }
 
 
-    public void open() throws IOException {
+    void open() throws IOException {
         streamIn = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         streamOut = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
     }
@@ -106,11 +106,11 @@ class ChatServerThread extends Thread {
         if (streamIn != null) streamIn.close();
     }
 
-    public void setAsPublisher() {
+    void setAsPublisher() {
         isPublisher = true;
     }
 
-    public void broadcastTo(Message input) {
+    void broadcastTo(Message input) {
         try {
             if (isConnected) {
                 message.setMessage("Channel number " + input.getOriginChannel() + " sent:\n" + input.getMessage());

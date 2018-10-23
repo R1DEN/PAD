@@ -4,31 +4,27 @@ class Message implements Serializable {
     private String message;
     private int originChannel;
 
-    public Message(String message) {
-        this.message = message;
+    Message() {
     }
 
-    public Message() {
-    }
-
-    public Message(Message input) {
+    Message(Message input) {
         this.message=input.message;
         this.originChannel=input.originChannel;
     }
 
-    public String getMessage() {
+    String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    void setMessage(String message) {
         this.message = message;
     }
 
-    public int getOriginChannel() {
+    int getOriginChannel() {
         return originChannel;
     }
 
-    public void setOriginChannel(int originChannel) {
+    void setOriginChannel(int originChannel) {
         this.originChannel = originChannel;
     }
 }

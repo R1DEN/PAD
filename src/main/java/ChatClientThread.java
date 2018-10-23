@@ -7,14 +7,14 @@ class ChatClientThread extends Thread {
     private ChatClient client = null;
     private DataInputStream streamIn = null;
 
-    public ChatClientThread(ChatClient client, Socket socket) {
+    ChatClientThread(ChatClient client, Socket socket) {
         this.client = client;
         this.socket = socket;
         open();
         start();
     }
 
-    public void open() {
+    void open() {
         try {
             streamIn = new DataInputStream(socket.getInputStream());
         } catch (IOException ioe) {
@@ -23,7 +23,7 @@ class ChatClientThread extends Thread {
         }
     }
 
-    public void close() {
+    void close() {
         try {
             if (streamIn != null) streamIn.close();
         } catch (IOException ioe) {

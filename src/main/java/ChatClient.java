@@ -55,7 +55,7 @@ class ChatClient implements Runnable {
         }
     }
 
-    public void handle(String msg) {
+    void handle(String msg) {
         System.out.println(gson.fromJson(msg, Message.class).getMessage());
     }
 
@@ -69,7 +69,7 @@ class ChatClient implements Runnable {
         }
     }
 
-    public void stop() {
+    void stop() {
         if (thread != null) {
             thread.stop();
             thread = null;
