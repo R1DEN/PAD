@@ -44,12 +44,23 @@ class ChatServerThread extends Thread {
                             break;
                         case ("switch channel"):
                         case ("get channel"):
+                        case ("add channel"):
                             message.setMessage("pick channel: 1,2,3");
                             streamOut.writeUTF(gson.toJson(message));
                             streamOut.flush();
                             int pickedChannel = Integer.parseInt(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
                             server.setChannel(pickedChannel, this);
-                            message.setMessage("picked channel:" + pickedChannel);
+                            message.setMessage("picked channels:" + server.getChannels(this).toString());
+                            streamOut.writeUTF(gson.toJson(message));
+                            streamOut.flush();
+                            break;
+                        case("leave channel"):
+                            message.setMessage("pick channel: "+ server.getChannels(this).toString());
+                            streamOut.writeUTF(gson.toJson(message));
+                            streamOut.flush();
+                            int pickedLeaveChannel = Integer.parseInt(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
+                            server.leaveChannel(pickedLeaveChannel, this);
+                            message.setMessage("picked channels:" + server.getChannels(this).toString());
                             streamOut.writeUTF(gson.toJson(message));
                             streamOut.flush();
                             break;

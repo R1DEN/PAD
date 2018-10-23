@@ -83,7 +83,7 @@ class ChatServer implements Runnable {
     }
 
 
-    public String setPublisher(ChatServerThread chatServerThread) {
+    String setPublisher(ChatServerThread chatServerThread) {
         if (!publisherIsSet) {
             publisherIsSet = true;
             chatServerThread.setAsPublisher();
@@ -93,14 +93,28 @@ class ChatServer implements Runnable {
         }
     }
 
-    public void broadcast(Message input) {
+    void broadcast(Message input) {
         for (ChatServerThread chatServerThread : channelClients.get(input.getOriginChannel() - 1)) {
             chatServerThread.broadcastTo(input);
         }
 
     }
 
-    public void setChannel(int pickedChannel, ChatServerThread chatServerThread) {
+    void setChannel(int pickedChannel, ChatServerThread chatServerThread) {
         channelClients.get(pickedChannel - 1).add(chatServerThread);
+    }
+
+    void leaveChannel(int pickedChannel, ChatServerThread chatServerThread) {
+        channelClients.get(pickedChannel - 1).remove(chatServerThread);
+    }
+
+    List<Integer> getChannels(ChatServerThread chatServerThread) {
+        List<Integer> channelList = new ArrayList<>();
+        for (int i = 0; i < channelClients.size(); i++) {
+            if (channelClients.get(i).contains(chatServerThread)) {
+                channelList.add(i + 1);
+            }
+        }
+        return channelList;
     }
 }
