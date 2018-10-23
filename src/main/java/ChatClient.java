@@ -11,6 +11,7 @@ class ChatClient implements Runnable {
     private ChatClientThread client = null;
     private Gson gson = new Gson();
     private Message message = new Message();
+    private boolean isConnected = false;
 
     private ChatClient(String serverName, int serverPort) {
         System.out.println("Establishing connection. Please wait ...");
@@ -31,13 +32,20 @@ class ChatClient implements Runnable {
     }
 
     public void run() {
+        isConnected=true;
         while (thread != null) {
             try {
                 String input = console.readLine();
-                if (input != null) {
+                if (input.equals("connect")){
+                    isConnected=true;
+                }
+                if (input != null && isConnected) {
                     message.setMessage(input);
                     streamOut.writeUTF(gson.toJson(message));
                     streamOut.flush();
+                }
+                if (input.equals("disconnect")){
+                    isConnected=false;
                 }
 
             } catch (IOException ioe) {

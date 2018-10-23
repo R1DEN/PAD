@@ -1,11 +1,21 @@
 import java.io.Serializable;
 
 class Message implements Serializable {
+    private String message;
+    private int originChannel;
+
     public Message(String message) {
         this.message = message;
     }
+
     public Message() {
     }
+
+    public Message(Message input) {
+        this.message=input.message;
+        this.originChannel=input.originChannel;
+    }
+
     public String getMessage() {
         return message;
     }
@@ -14,6 +24,11 @@ class Message implements Serializable {
         this.message = message;
     }
 
-    private String message;
+    public int getOriginChannel() {
+        return originChannel;
+    }
 
+    public void setOriginChannel(int originChannel) {
+        this.originChannel = originChannel;
+    }
 }

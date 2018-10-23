@@ -2,6 +2,8 @@ import com.google.gson.Gson;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 class ChatServerThread extends Thread {
     private Socket socket;
@@ -13,6 +15,9 @@ class ChatServerThread extends Thread {
     private Message message = new Message();
     private Gson gson = new Gson();
 
+    private List<Message> deadLetters = new ArrayList<>();
+    private boolean isConnected = false;
+
     public ChatServerThread(ChatServer server, Socket socket) {
         this.server = server;
         this.socket = socket;
@@ -21,44 +26,58 @@ class ChatServerThread extends Thread {
 
     public void run() {
         System.out.println("Server Thread " + ID + " running.");
+        isConnected = true;
         while (true) {
             try {
-                String input = gson.fromJson(streamIn.readUTF(),Message.class).getMessage();
-                switch (input.toLowerCase()) {
-                    case ("switch channel"):
-                    case ("get channel"):
-                        message.setMessage("pick channel: 1,2,3");
-                        streamOut.writeUTF(gson.toJson(message));
-                        streamOut.flush();
-                        int pickedChannel = Integer.parseInt(gson.fromJson(streamIn.readUTF(),Message.class).getMessage());
-                        server.setChannel(pickedChannel, this);
-                        message.setMessage("picked channel:" + pickedChannel);
-                        streamOut.writeUTF(gson.toJson(message));
-                        streamOut.flush();
-                        break;
-                    case ("publisher"):
-                        message.setMessage(server.setPublisher(this));
-                        streamOut.writeUTF(gson.toJson(message));
-                        streamOut.flush();
-                        break;
-                    case ("publish"):
-                        if (isPublisher) {
+                String input = gson.fromJson(streamIn.readUTF(), Message.class).getMessage();
+                    switch (input.toLowerCase()) {
+                        case ("disconnect"):
+                            isConnected = false;
+                            break;
+                        case ("connect"):
+                            isConnected = true;
+                            for (Message deadLetter:
+                                 deadLetters) {
+                                broadcastTo(deadLetter);
+                            }
+                            deadLetters.clear();
+                            break;
+                        case ("switch channel"):
+                        case ("get channel"):
                             message.setMessage("pick channel: 1,2,3");
                             streamOut.writeUTF(gson.toJson(message));
                             streamOut.flush();
-                            int channel = Integer.parseInt(gson.fromJson(streamIn.readUTF(),Message.class).getMessage());
-                            message.setMessage("enter message: ");
+                            int pickedChannel = Integer.parseInt(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
+                            server.setChannel(pickedChannel, this);
+                            message.setMessage("picked channel:" + pickedChannel);
                             streamOut.writeUTF(gson.toJson(message));
                             streamOut.flush();
-                            server.broadcast(channel, gson.fromJson(streamIn.readUTF(),Message.class).getMessage());
-                        }
+                            break;
+                        case ("publisher"):
+                            message.setMessage(server.setPublisher(this));
+                            streamOut.writeUTF(gson.toJson(message));
+                            streamOut.flush();
+                            break;
+                        case ("publish"):
+                            if (isPublisher) {
+                                message.setMessage("pick channel: 1,2,3");
+                                streamOut.writeUTF(gson.toJson(message));
+                                streamOut.flush();
+                                int channel = Integer.parseInt(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
+                                message.setMessage("enter message: ");
+                                streamOut.writeUTF(gson.toJson(message));
+                                streamOut.flush();
+                                message.setMessage(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
+                                message.setOriginChannel(channel);
+                                server.broadcast(message);
+                            }
 
-                    default:
-                        //  if (pickedPartner != null) {
-                        //      server.sendTo(pickedPartner, input, socket);
-                        //  }
-                        break;
-                }
+                        default:
+                            //  if (pickedPartner != null) {
+                            //      server.sendTo(pickedPartner, input, socket);
+                            //  }
+                            break;
+                    }
             } catch (IOException ioe) {
                 System.out.println("Unexpected exception: " + ioe.getMessage());
             }
@@ -80,11 +99,16 @@ class ChatServerThread extends Thread {
         isPublisher = true;
     }
 
-    public void broadcastTo(String input, int originChannel) {
+    public void broadcastTo(Message input) {
         try {
-            message.setMessage("Channel number " + originChannel + " sent:\n" + input);
-            streamOut.writeUTF(gson.toJson(message));
-            streamOut.flush();
+            if (isConnected) {
+                message.setMessage("Channel number " + input.getOriginChannel() + " sent:\n" + input.getMessage());
+                streamOut.writeUTF(gson.toJson(message));
+                streamOut.flush();
+            }
+            else {
+                deadLetters.add(new Message(input));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
