@@ -1,10 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class ChatServer implements Runnable {
     private ServerSocket server = null;
@@ -93,11 +90,36 @@ class ChatServer implements Runnable {
         }
     }
 
-    void broadcast(Message input) {
-        for (ChatServerThread chatServerThread : channelClients.get(input.getOriginChannel() - 1)) {
-            chatServerThread.broadcastTo(input);
+    void broadcast(Message input) throws Exception {
+        for (Integer i :
+                defineChannel(input)) {
+            for (ChatServerThread chatServerThread :
+                    channelClients.get(i - 1)) {
+                input.setOriginChannel(i);
+                chatServerThread.broadcastTo(input);
+            }
         }
+    }
 
+    private List<Integer> defineChannel(Message message) throws Exception {
+        List<Integer> result = new ArrayList<>();
+        String vocab1 = "games,E3,gamescon,game,graphics";
+        String[] vocabChan1 = new ArrayList<>(Arrays.asList(vocab1.split(","))).toArray(new String[0]);
+        String vocab2 = "car,cars,engine,tuning,tuned,spoiler";
+        String[] vocabChan2 = new ArrayList<>(Arrays.asList(vocab2.split(","))).toArray(new String[0]);
+        String vocab3 = "phone,snapdragon,smartphone,touchscreen";
+        String[] vocabChan3 = new ArrayList<>(Arrays.asList(vocab3.split(","))).toArray(new String[0]);
+        if (Arrays.stream(vocabChan1).parallel().anyMatch(message.getMessage().toLowerCase()::contains)) {
+            result.add(1);
+        }
+        if (Arrays.stream(vocabChan2).parallel().anyMatch(message.getMessage().toLowerCase()::contains)) {
+            result.add(2);
+        }
+        if (Arrays.stream(vocabChan3).parallel().anyMatch(message.getMessage().toLowerCase()::contains)) {
+            result.add(3);
+        }
+        if (result.size() == 0) throw new Exception("No such channel");
+        return result;
     }
 
     void setChannel(int pickedChannel, ChatServerThread chatServerThread) {
@@ -108,11 +130,21 @@ class ChatServer implements Runnable {
         channelClients.get(pickedChannel - 1).remove(chatServerThread);
     }
 
-    List<Integer> getChannels(ChatServerThread chatServerThread) {
-        List<Integer> channelList = new ArrayList<>();
+    List<String> getChannels(ChatServerThread chatServerThread) {
+        List<String> channelList = new ArrayList<>();
         for (int i = 0; i < channelClients.size(); i++) {
             if (channelClients.get(i).contains(chatServerThread)) {
-                channelList.add(i + 1);
+                switch (i) {
+                    case 0:
+                        channelList.add("Channel n." + (i + 1) + ": Games");
+                        break;
+                    case 1:
+                        channelList.add("Channel n." + (i + 1) + ": Automotive");
+                        break;
+                    case 2:
+                        channelList.add("Channel n." + (i + 1) + ": Tech");
+                        break;
+                }
             }
         }
         return channelList;

@@ -45,7 +45,7 @@ class ChatServerThread extends Thread {
                         case ("switch channel"):
                         case ("get channel"):
                         case ("add channel"):
-                            message.setMessage("pick channel: 1,2,3");
+                            message.setMessage("pick channel: 1:Games, 2:Automotive ,3:Tech");
                             streamOut.writeUTF(gson.toJson(message));
                             streamOut.flush();
                             int pickedChannel = Integer.parseInt(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
@@ -71,26 +71,26 @@ class ChatServerThread extends Thread {
                             break;
                         case ("publish"):
                             if (isPublisher) {
-                                message.setMessage("pick channel: 1,2,3");
-                                streamOut.writeUTF(gson.toJson(message));
-                                streamOut.flush();
-                                int channel = Integer.parseInt(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
+//                                message.setMessage("pick channel: 1,2,3");
+//                                streamOut.writeUTF(gson.toJson(message));
+//                                streamOut.flush();
+//                                int channel = Integer.parseInt(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
                                 message.setMessage("enter message: ");
                                 streamOut.writeUTF(gson.toJson(message));
                                 streamOut.flush();
                                 message.setMessage(gson.fromJson(streamIn.readUTF(), Message.class).getMessage());
-                                message.setOriginChannel(channel);
+//                                message.setOriginChannel(channel);
                                 server.broadcast(message);
                             }
 
                         default:
-                            //  if (pickedPartner != null) {
-                            //      server.sendTo(pickedPartner, input, socket);
-                            //  }
+
                             break;
                     }
-            } catch (IOException ioe) {
+            } catch (IOException ioe ) {
                 System.out.println("Unexpected exception: " + ioe.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
